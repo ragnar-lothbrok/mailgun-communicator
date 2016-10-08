@@ -3,7 +3,9 @@ package com.demo.account.service;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
@@ -46,6 +48,8 @@ public class VerificationService {
 
 	@Value("${mailgun.mail.received.filepath}")
 	private String mailSentList;
+	
+	final static List<String> sentMails = new ArrayList<String>();
 
 	private void init() {
 		final MailModel mailModel = new MailModel();
@@ -98,11 +102,15 @@ public class VerificationService {
 			}
 		}
 
+		System.out.println(mailModel.getReceiverList());
 		if (mailModel.getReceiverList().size() > 0) {
 			mailModel.getReceiverList().stream().forEach(new Consumer<String>() {
 				@Override
 				public void accept(String emailId) {
-					sendMailByMailGun(emailId, mailModel.getMailTemplate());
+					if(!sentMails.contains(emailId)){
+						sentMails.add(emailId); 
+						sendMailByMailGun(emailId, mailModel.getMailTemplate());
+					}
 				}
 			});
 		}
@@ -128,7 +136,7 @@ public class VerificationService {
 
 			logger.info("Send Mail details : " + emailId+" "+ webResource.type(MediaType.APPLICATION_FORM_URLENCODED).post(ClientResponse.class, formData));
 		} catch (Exception e) {
-			logger.error("Exception occured : {}", e);
+			logger.error("Exception occured : {}", "s");
 		} finally {
 
 		}
